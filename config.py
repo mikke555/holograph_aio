@@ -23,7 +23,7 @@ rpcs - Небольшая рекомендация для тех кто буде
 
 """
 
-NAME = 'GREEN SCULL'
+NAME = 'GREEN SKULL'
 
 CONTRACT = '0x61B2d56645d697Ac3a27c2fa1e5B26B45429d1A9'
 
