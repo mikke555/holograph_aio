@@ -59,6 +59,12 @@ class Minter(Help):
 
         return False
 
+    def __get_fee(self, amount):
+        contract = self.w3.eth.contract(self.drop_address,abi=abi)
+        fee = contract.functions.getHolographFeeWei(amount).call()
+        return int(fee*1.05)
+
+
     def mint(self):
         if self.mode == 1:
             chain = self.balance()
@@ -70,41 +76,43 @@ class Minter(Help):
         self.w3 = Web3(Web3.HTTPProvider(rpcs[self.chain]))
         self.account = self.w3.eth.account.from_key(self.privatekey)
         self.address = self.account.address
-        while True:
-            try:
-                nonce = self.w3.eth.get_transaction_count(self.address)
-                contract = self.w3.eth.contract(address=self.drop_address, abi=abi)
-                tx = contract.functions.purchase(self.count).build_transaction({
-                    'from': self.address,
-                    'gas': contract.functions.purchase(self.count).estimate_gas(
-                        {'from': self.address, 'nonce': nonce}),
-                    'nonce': nonce,
-                    'maxFeePerGas': int(self.w3.eth.gas_price),
-                    'maxPriorityFeePerGas': int(self.w3.eth.gas_price * 0.8)
-                })
-                if self.chain == 'bsc':
-                    del tx['maxFeePerGas']
-                    del tx['maxPriorityFeePerGas']
-                    tx['gasPrice'] = self.w3.eth.gas_price
-                sign = self.account.sign_transaction(tx)
-                hash_ = self.w3.eth.send_raw_transaction(sign.rawTransaction)
-                status = self.check_status_tx(hash_)
-                if status == 1:
-                    logger.info(
-                        f'{self.address}:{self.chain} - успешно заминтил {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}...')
-                    self.sleep_indicator(self.delay)
-                    return self.privatekey, self.address, 'success'
-            except Exception as e:
-                error = str(e)
-                if "insufficient funds for gas * price + value" in error:
-                    logger.error(f'{self.address}:{self.chain} - нет баланса нативного токена')
-                    return self.privatekey, self.address, 'error'
-                elif 'nonce too low' in error or 'already known' in error:
-                    logger.info(f'{self.address}:{self.chain} - пробую еще раз...')
-                    self.mint()
-                else:
-                    logger.error(f'{self.address}:{self.chain}  - {e}')
-                    return self.privatekey, self.address, 'error'
+        fee = self.__get_fee(self.count)
+
+        try:
+            nonce = self.w3.eth.get_transaction_count(self.address)
+            contract = self.w3.eth.contract(address=self.drop_address, abi=abi)
+            tx = contract.functions.purchase(self.count).build_transaction({
+                'from': self.address,
+                'nonce': nonce,
+                'value': fee,
+                'maxFeePerGas': 0,
+                'maxPriorityFeePerGas': 0
+            })
+            gas = self.w3.eth.gas_price
+            tx['maxFeePerGas'], tx['maxPriorityFeePerGas'] = gas, gas
+            if self.chain == 'bsc':
+                del tx['maxFeePerGas']
+                del tx['maxPriorityFeePerGas']
+                tx['gasPrice'] = self.w3.eth.gas_price
+            sign = self.account.sign_transaction(tx)
+            hash_ = self.w3.eth.send_raw_transaction(sign.rawTransaction)
+            status = self.check_status_tx(hash_)
+            if status == 1:
+                logger.info(
+                    f'{self.address}:{self.chain} - успешно заминтил {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}...')
+                self.sleep_indicator(self.delay)
+                return self.privatekey, self.address, 'success'
+        except Exception as e:
+            error = str(e)
+            if "insufficient funds for gas * price + value" in error:
+                logger.error(f'{self.address}:{self.chain} - нет баланса нативного токена')
+                return self.privatekey, self.address, 'error'
+            elif 'nonce too low' in error or 'already known' in error:
+                logger.info(f'{self.address}:{self.chain} - пробую еще раз...')
+                return self.mint()
+            else:
+                logger.error(f'{self.address}:{self.chain}  - {e}')
+                return self.privatekey, self.address, 'error'
 
 
 class Bridger(Help):

@@ -23,13 +23,13 @@ rpcs - Небольшая рекомендация для тех кто буде
 
 """
 
-NAME = 'GREEN SKULL'
+NAME = 'WDWGF'
 
-CONTRACT = '0x61B2d56645d697Ac3a27c2fa1e5B26B45429d1A9'
+CONTRACT = '0xcB0Bb5D835A47584fdA53F57bb4193B28d2738dB'
 
 count = 1  # либо [от, до]
 
-MODE = ''  # bridger, minter
+MODE = 'minter'  # bridger, minter
 
 minter_mode = 1  # 0 - your chain
 
