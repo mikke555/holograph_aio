@@ -102,6 +102,8 @@ class Minter(Help):
                     f'{self.address}:{self.chain} - успешно заминтил {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}...')
                 self.sleep_indicator(self.delay)
                 return self.privatekey, self.address, 'success'
+            else:
+                return self.mint()
         except Exception as e:
             error = str(e)
             if "insufficient funds for gas * price + value" in error:
