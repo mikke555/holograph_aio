@@ -77,7 +77,6 @@ class Minter(Help):
         self.account = self.w3.eth.account.from_key(self.privatekey)
         self.address = self.account.address
         fee = self.__get_fee(self.count)
-
         try:
             nonce = self.w3.eth.get_transaction_count(self.address)
             contract = self.w3.eth.contract(address=self.drop_address, abi=abi)
@@ -90,7 +89,7 @@ class Minter(Help):
             })
             gas = self.w3.eth.gas_price
             tx['maxFeePerGas'], tx['maxPriorityFeePerGas'] = gas, gas
-            if self.chain == 'bsc':
+            if self.chain in ('bsc', 'mantle'):
                 del tx['maxFeePerGas']
                 del tx['maxPriorityFeePerGas']
                 tx['gasPrice'] = self.w3.eth.gas_price
@@ -291,9 +290,9 @@ class Bridger(Help):
         lzEndpoint = self.w3.eth.contract(address=self.LzEndAddress, abi=lzEndpointABI)
 
         lzFee = lzEndpoint.functions.estimateFees(Lz_ids[self.to], self.HolographBridgeAddress, '0x', False, '0x').call()[0]
-        lzFee = int(lzFee * 2.5)
+        lzFee = int(lzFee * 3.5)
         to = holograph_ids[self.to]
-
+        print(lzFee/10**18)
         while True:
             logger.info(f'{self.address}:{self.chain} - trying to bridge... ')
             try:
