@@ -128,7 +128,7 @@ class Bridger(Help):
         self.mode = mode
         self.delay = random.randint(delay[0], delay[1])
         self.moralisapi = api
-        self.HolographBridgeAddress = Web3.to_checksum_address('0xD85b5E176A30EdD1915D6728FaeBD25669b60d8b')
+        self.HolographBridgeAddress = Web3.to_checksum_address('0x8D5b1b160D33ce8B6CAFE2674A81916D33C6Ff0B')
         self.LzEndAddress = Web3.to_checksum_address('0x3c2269811836af69497E5F486A85D7316753cf62' if self.chain != 'mantle' else '0xb6319cC6c8c27A8F5dAF0dD3DF91EA35C4720dd7')
         self.nft_address = Web3.to_checksum_address(CONTRACT)
 
