@@ -48,7 +48,7 @@ delay = (0, 100)
 
 moralis_api = ''
 
-rpcs = {'bsc': 'https://bscrpc.com',
+rpcs = {'bsc': 'https://rpc.ankr.com/bsc',
         'polygon': 'https://rpc.ankr.com/polygon',
         'avax': 'https://rpc.ankr.com/avalanche',
         'opti': 'https://rpc.ankr.com/optimism',

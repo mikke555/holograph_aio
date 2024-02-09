@@ -89,10 +89,10 @@ class Minter(Help):
             })
             gas = self.w3.eth.gas_price
             tx['maxFeePerGas'], tx['maxPriorityFeePerGas'] = gas, gas
-            if self.chain in ('bsc', 'mantle'):
+            if self.chain == 'bsc':
                 del tx['maxFeePerGas']
                 del tx['maxPriorityFeePerGas']
-                tx['gasPrice'] = self.w3.eth.gas_price
+                tx['gasPrice'] = 1000000000                
             sign = self.account.sign_transaction(tx)
             hash_ = self.w3.eth.send_raw_transaction(sign.rawTransaction)
             status = self.check_status_tx(hash_)
@@ -101,8 +101,6 @@ class Minter(Help):
                     f'{self.address}:{self.chain} - успешно заминтил {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}...')
                 self.sleep_indicator(self.delay)
                 return self.privatekey, self.address, 'success'
-            else:
-                return self.mint()
         except Exception as e:
             error = str(e)
             if "insufficient funds for gas * price + value" in error:
@@ -290,7 +288,7 @@ class Bridger(Help):
         lzEndpoint = self.w3.eth.contract(address=self.LzEndAddress, abi=lzEndpointABI)
 
         lzFee = lzEndpoint.functions.estimateFees(Lz_ids[self.to], self.HolographBridgeAddress, '0x', False, '0x').call()[0]
-        lzFee = int(lzFee * 3.5)
+        lzFee = int(lzFee * 2.5)
         to = holograph_ids[self.to]
         print(lzFee/10**18)
         while True:
@@ -311,7 +309,7 @@ class Bridger(Help):
                 if self.chain == 'bsc':
                     del tx['maxFeePerGas']
                     del tx['maxPriorityFeePerGas']
-                    tx['gasPrice'] = self.w3.eth.gas_price
+                    tx['gasPrice'] = 1000000000
                 sign = self.account.sign_transaction(tx)
                 hash_ = self.w3.eth.send_raw_transaction(sign.rawTransaction)
                 status = self.check_status_tx(hash_)
@@ -331,4 +329,3 @@ class Bridger(Help):
                 else:
                     logger.error(f'{self.address}:{self.chain}  - {e}')
                     return self.privatekey, self.address, 'error'
-
