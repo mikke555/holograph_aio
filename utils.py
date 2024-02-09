@@ -47,7 +47,7 @@ class Minter(Help):
         self.address = ''
 
     def balance(self):
-        chainss = ['avax', 'polygon', 'bsc', 'opti', 'mantle']
+        chainss = ['avax', 'polygon', 'bsc', 'opti', 'mantle', 'zora']
         random.shuffle(chainss)
         for i in chainss:
             w3 = Web3(Web3.HTTPProvider(rpcs[i]))
@@ -80,19 +80,19 @@ class Minter(Help):
         try:
             nonce = self.w3.eth.get_transaction_count(self.address)
             contract = self.w3.eth.contract(address=self.drop_address, abi=abi)
-            tx = contract.functions.purchase(self.count).build_transaction({
-                'from': self.address,
-                'nonce': nonce,
-                'value': fee,
-                'maxFeePerGas': 0,
-                'maxPriorityFeePerGas': 0
-            })
-            gas = self.w3.eth.gas_price
-            tx['maxFeePerGas'], tx['maxPriorityFeePerGas'] = gas, gas
+            common_params = {
+                "from": self.address,
+                "nonce": nonce,
+                "value": fee,
+            }
             if self.chain == 'bsc':
-                del tx['maxFeePerGas']
-                del tx['maxPriorityFeePerGas']
-                tx['gasPrice'] = 1000000000                
+                tx_params = {**common_params, "gasPrice": 1000000000}
+            elif self.chain == 'zora':
+                tx_params = {**common_params, "maxPriorityFeePerGas": Web3.to_wei(0.005, 'gwei'), "maxFeePerGas": Web3.to_wei(0.005, 'gwei')}
+            else:
+                tx_params = common_params
+                
+            tx = contract.functions.purchase(self.count).build_transaction(tx_params)
             sign = self.account.sign_transaction(tx)
             hash_ = self.w3.eth.send_raw_transaction(sign.rawTransaction)
             status = self.check_status_tx(hash_)
