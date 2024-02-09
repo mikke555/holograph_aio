@@ -13,14 +13,14 @@ from config import NAME, CONTRACT
 
 class Help:
     def check_status_tx(self, tx_hash):
-        logger.info(f'{self.address} - жду подтверждения транзакции  {scans[self.chain]}{self.w3.to_hex(tx_hash)}...')
+        logger.info(f'{self.address} - waiting for tx to confirm {scans[self.chain]}{self.w3.to_hex(tx_hash)}...')
 
         start_time = int(time.time())
         while True:
             current_time = int(time.time())
             if current_time >= start_time + 100:
                 logger.info(
-                    f'{self.address} - транзакция не подтвердилась за 100 cекунд, начинаю повторную отправку...')
+                    f'{self.address} - tx not confirmed within 100 seconds, resending...')
                 return 0
             try:
                 status = self.w3.eth.get_transaction_receipt(tx_hash)['status']
@@ -98,16 +98,16 @@ class Minter(Help):
             status = self.check_status_tx(hash_)
             if status == 1:
                 logger.info(
-                    f'{self.address}:{self.chain} - успешно заминтил {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}...')
+                    f'{self.address}:{self.chain} - successfully minted {self.count} {NAME} {scans[self.chain]}{self.w3.to_hex(hash_)}...')
                 self.sleep_indicator(self.delay)
                 return self.privatekey, self.address, 'success'
         except Exception as e:
             error = str(e)
             if "insufficient funds for gas * price + value" in error:
-                logger.error(f'{self.address}:{self.chain} - нет баланса нативного токена')
+                logger.error(f'{self.address}:{self.chain} - no balance in the native token')
                 return self.privatekey, self.address, 'error'
             elif 'nonce too low' in error or 'already known' in error:
-                logger.info(f'{self.address}:{self.chain} - пробую еще раз...')
+                logger.info(f'{self.address}:{self.chain} - trying one more time...')
                 return self.mint()
             else:
                 logger.error(f'{self.address}:{self.chain}  - {e}')
@@ -321,10 +321,10 @@ class Bridger(Help):
             except Exception as e:
                 error = str(e)
                 if "insufficient funds for gas * price + value" in error:
-                    logger.error(f'{self.address}:{self.chain} - нет баланса нативного токена')
+                    logger.error(f'{self.address}:{self.chain} - no balance in the native token')
                     return self.privatekey, self.address, 'error'
                 elif 'nonce too low' in error or 'already known' in error:
-                    logger.info(f'{self.address}:{self.chain} - пробую еще раз...')
+                    logger.info(f'{self.address}:{self.chain} - trying one more time...')
                     self.bridge()
                 else:
                     logger.error(f'{self.address}:{self.chain}  - {e}')

@@ -19,18 +19,17 @@ def write_to_csv(key, address, result):
         writer.writerow([key, address, result])
 
 def main():
-    print(f'\n{" " * 32}автор - https://t.me/iliocka{" " * 32}\n')
     if shuffle:
         random.shuffle(keys)
 
     if MODE == 'minter':
-        logger.info(f'Запущен минтер {NAME}...')
+        logger.info(f'Minting started {NAME}...')
         for key in keys:
             mint_ = Minter(key, chain, count, delay, minter_mode)
             res = mint_.mint()
             write_to_csv(*res)
     if MODE == 'bridger':
-        logger.info(f'Запущен бриджер {NAME}...')
+        logger.info(f'Bridging started {NAME}...')
         for key in keys:
             bridge_ = Bridger(key, chain, to_chain, delay, moralis_api, bridger_mode)
             res = bridge_.bridge()
@@ -38,14 +37,9 @@ def main():
 
 
     if MODE == 'minter':
-        logger.success('mинетинг закончен...')
+        logger.success('Minting complete')
     else:
-        logger.success('бриджетинг закончен...')
-
-    print(f'\n{" " * 32}автор - https://t.me/iliocka{" " * 32}\n')
-    print(f'\n{" " * 32}donate - EVM 0xFD6594D11b13C6b1756E328cc13aC26742dBa868{" " * 32}\n')
-    print(f'\n{" " * 32}donate - trc20 TMmL915TX2CAPkh9SgF31U4Trr32NStRBp{" " * 32}\n')
-
+        logger.success('Bridging complete')
 
 if __name__ == '__main__':
     main()
